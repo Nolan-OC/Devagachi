@@ -13,7 +13,8 @@ PET_UPDATE_INTERVAL = 5000  # Pet updates energy every 5 seconds
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Devagotchi Game")
 
-# Load pet images
+# Load pet images (replace with your pet's art assets)
+# Example: pet_image = pygame.image.load("pet.png")
 sprite_sheet = pygame.image.load("Assets/character_idle.png")
 frame_width, frame_height = 32, 32
 # Create a list of Rectangles for the animation frames
@@ -38,11 +39,12 @@ class Pet:
             self.energy = 0
 
     def feed(self):
-        # Implement the feeding logic (e.g., increase energy)
+        print("feeding time")
         self.energy = 100
 
-    def start_event(self):
-        # Implement the special event logic
+    def start_work(self):
+        # TODO
+        print("working time")
         pass
 
     def update(self):
@@ -56,21 +58,18 @@ class Pet:
 
 # Create buttons
 class Button:
-    def __init__(self, x, y, width, height, color, text, action):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
-        self.text = text
+    def __init__(self, x, y, image_path, action):
+        self.image = pygame.image.load(image_path)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
         self.action = action
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
-        font = pygame.font.Font(None, 36)
-        text = font.render(self.text, True, (0, 0, 0))
-        text_rect = text.get_rect(center=self.rect.center)
-        screen.blit(text, text_rect)
+        screen.blit(self.image, self.rect)
 
-coffee_button = Button(100, 450, 150, 50, (255, 0, 0), "Coffee", Pet.feed)
-contract_button = Button(300, 450, 150, 50, (0, 0, 255), "Contract", Pet.start_event)
+
+coffee_button = Button(100, 450, "Assets/item_coffee.png", Pet.feed)
+contract_button = Button(300, 450, "Assets/item_scroll.png", Pet.start_work)
 
 # Main game loop
 pet = Pet(400,300)
@@ -87,7 +86,7 @@ while running:
             if coffee_button.rect.collidepoint(event.pos):
                 pet.feed()
             if contract_button.rect.collidepoint(event.pos):
-                pet.start_event()
+                pet.start_work()
 
     current_time = pygame.time.get_ticks()
     if current_time - last_update_time > PET_UPDATE_INTERVAL:
@@ -96,7 +95,8 @@ while running:
 
     screen.fill(BACKGROUND_COLOR)
     # Draw the pet
-    # blit your pet's image or animation frames
+
+    # blit animation frames
     current_frame_rect = frame_rectangles[pet.current_frame]
     screen.blit(sprite_sheet, (pet.x, pet.y), current_frame_rect)
 
