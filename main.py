@@ -13,10 +13,10 @@ PET_UPDATE_INTERVAL = 5000  # Pet updates energy every 5 seconds
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Devagotchi Game")
 
-# Load pet images (replace with your pet's art assets)
-# Example: pet_image = pygame.image.load("pet.png")
+# Load pet images
 sprite_sheet = pygame.image.load("Assets/character_idle.png")
 frame_width, frame_height = 32, 32
+
 # Create a list of Rectangles for the animation frames
 frame_rectangles = []
 for x in range(0, sprite_sheet.get_width(), frame_width):
@@ -99,6 +99,7 @@ while running:
     # blit animation frames
     current_frame_rect = frame_rectangles[pet.current_frame]
     screen.blit(sprite_sheet, (pet.x, pet.y), current_frame_rect)
+
 
     # Draw buttons
     coffee_button.draw(screen)
