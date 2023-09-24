@@ -1,27 +1,20 @@
+from stringprep import c22_specials
 import pygame
 import random
+from enum import Enum
 
 # Initialize Pygame
 pygame.init()
 
-# Constants
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
-BACKGROUND_COLOR = (255, 255, 255)
-PET_UPDATE_INTERVAL = 5000  # Pet updates energy every 5 seconds
+# class of colors
+class Color:
+    white = (255,255,255)
+    black = (0,0,0)
 
-# Create the game window
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Devagotchi Game")
-
-# Load pet images
-sprite_sheet = pygame.image.load("Assets/character_idle.png")
-frame_width, frame_height = 32, 32
-
-# Create a list of Rectangles for the animation frames
-frame_rectangles = []
-for x in range(0, sprite_sheet.get_width(), frame_width):
-    frame_rect = pygame.Rect(x, 0, frame_width, frame_height)
-    frame_rectangles.append(frame_rect)
+class PetState(Enum):
+    Happy = 1
+    Idle = 2
+    Item = 3
 
 # Create a Pet class
 class Pet:
@@ -32,6 +25,9 @@ class Pet:
         self.last_frame_update = pygame.time.get_ticks()
         self.x = x  # Initial x position
         self.y = y  # Initial y position
+        self.scale = 10
+        self.image = get_image(character_idle_sheet,0,16,16,10)
+        self.state = PetState.Idle
 
     def decrease_energy(self):
         self.energy -= 1
@@ -50,11 +46,33 @@ class Pet:
     def update(self):
         self.decrease_energy()
 
-        # Update the animation frame
+        # Update the animation frame if enough time is passed
         current_time = pygame.time.get_ticks()
         if current_time - self.last_frame_update > self.animation_delay:
-            self.current_frame = (self.current_frame + 1) % len(frame_rectangles)
-            self.last_frame_update = current_time
+            # change states
+            random_state = random.randint(0,10)
+            if random_state == 0:
+                print('happy')
+                self.state = PetState.Happy
+            else:
+                print('idle')
+                self.state = PetState.Idle
+
+            # change anim based on states
+            random_frame = random.randint(0,3)
+            if(self.state == PetState.Idle):
+                # toggle idle animation frames
+                if random_frame == 0:
+                    self.image = get_image(character_idle_sheet, 1 ,16,16,self.scale)
+                else:
+                    self.image = get_image(character_idle_sheet, 0 ,16,16,self.scale)
+            elif(self.state == PetState.Happy):
+                # toggle happy animation frames
+                if random_frame == 0:
+                    self.image = get_image(character_happy_idle_sheet, 1 ,16,16,self.scale)
+                else:
+                    self.image = get_image(character_happy_idle_sheet, 0 ,16,16,self.scale)
+
 
 # Create buttons
 class Button:
@@ -67,12 +85,36 @@ class Button:
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
+# ---Constants---
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+BACKGROUND_COLOR = Color.white
+PET_UPDATE_INTERVAL = 750  # Pet updates energy every x*1000 seconds
+# Set up window
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Devagotchi Game")
 
+# Load pet images to memory
+character_idle_sheet = pygame.image.load('Assets/character_idle.png').convert_alpha()
+character_happy_idle_sheet = pygame.image.load('Assets/happy_idle.png').convert_alpha()
+
+def get_image(sheet, frame, width, height, scale):
+    image = pygame.Surface((width,height), pygame.SRCALPHA).convert_alpha()
+    image.blit(sheet, (0,0), ((frame * width), 0, width, height))
+    image = pygame.transform.scale(image, (width * scale, height * scale))
+
+    return image
+ 
+
+# ---Create Assets---
+# Buttons
 coffee_button = Button(100, 450, "Assets/item_coffee.png", Pet.feed)
 contract_button = Button(300, 450, "Assets/item_scroll.png", Pet.start_work)
+# Player
+pet = Pet(400,300)
+frame_0 = get_image(character_idle_sheet, 0, 16, 16, 10)
+frame_1 = get_image(character_idle_sheet, 1, 16, 16, 10)
 
 # Main game loop
-pet = Pet(400,300)
 clock = pygame.time.Clock()
 
 running = True
@@ -94,11 +136,10 @@ while running:
         last_update_time = current_time
 
     screen.fill(BACKGROUND_COLOR)
-    # Draw the pet
 
-    # blit animation frames
-    current_frame_rect = frame_rectangles[pet.current_frame]
-    screen.blit(sprite_sheet, (pet.x, pet.y), current_frame_rect)
+    # blit pets animation frames
+    
+    screen.blit(pet.image, (0,0))
 
 
     # Draw buttons
