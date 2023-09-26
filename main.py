@@ -9,6 +9,8 @@ pygame.init()
 # class of colors
 class Color:
     white = (255,255,255)
+    grey_light = (180,180,180)
+    grey = (125,125,125)
     black = (0,0,0)
 
 class State(Enum):
@@ -129,13 +131,15 @@ class Pet:
 
 # Create buttons
 class Button:
-    def __init__(self, x, y, image_path, action):
-        self.image = pygame.image.load(image_path)
+    def __init__(self, x, y, image_path, action, bg_color):
+        self.image = get_image(pygame.image.load(image_path), 0, 32, 32, 7)
+        self.bg_color = bg_color
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.action = action
 
     def draw(self, screen):
+        pygame.draw.rect(screen, self.bg_color, (self.rect.x, self.rect.y, 204, 204))
         screen.blit(self.image, self.rect)
 
 def get_image(sheet, frame, width, height, scale):
@@ -146,13 +150,13 @@ def get_image(sheet, frame, width, height, scale):
     return image
 # ---Constants---
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
-BACKGROUND_COLOR = Color.white
+BACKGROUND_COLOR = Color.grey
 PET_UPDATE_INTERVAL = 750  # Pet updates energy every x*1000 seconds
 # Set up window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Devagotchi Game")
 
-# Load pet images to memory
+# Load  images to memory
 character_idle_sheet = pygame.image.load('Assets/character_idle.png').convert_alpha()
 character_happy_idle_sheet = pygame.image.load('Assets/happy_idle.png').convert_alpha()
 character_item_image = pygame.image.load('Assets/character_item_received.png').convert_alpha()
@@ -161,10 +165,12 @@ character_work_sheet = pygame.image.load('Assets/character_working.png').convert
 computer_idle_sheet = pygame.image.load('Assets/computer_idle.png').convert_alpha()
 computer_work_sheet = pygame.image.load('Assets/computer_work.png').convert_alpha()
 
+keyboard_image = pygame.image.load('Assets/keyboard.png').convert_alpha()
+
 # ---Create Assets---
 # Buttons
-coffee_button = Button(100, 450, "Assets/item_coffee.png", Pet.feed)
-contract_button = Button(300, 450, "Assets/item_scroll.png", Pet.start_work)
+coffee_button = Button(0, 0, "Assets/item_coffee.png", Pet.feed, Color.grey_light)
+contract_button = Button(270, 0, "Assets/item_scroll.png", Pet.start_work, Color.grey_light)
 # Player
 pet = Pet(250,300)
 computer = Computer(400,300)
@@ -195,15 +201,15 @@ while running:
     screen.fill(BACKGROUND_COLOR)
 
     # blit pets animation frames
-    
-    screen.blit(pet.image, (pet.x,pet.y))
+    screen.blit(pet.image, (pet.x, pet.y))
     screen.blit(computer.image, (computer.x, computer.y))
 
-
-    # Draw buttons
+    # blit static images
     coffee_button.draw(screen)
     contract_button.draw(screen)
-
+    if(pet.state ==  State.Working):
+        screen.blit(get_image(keyboard_image, 0, 32, 132, 10), (pet.x+1, pet.y+1))
+        
     pygame.display.flip()
     clock.tick(30)
 
